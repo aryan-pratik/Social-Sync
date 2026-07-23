@@ -7,7 +7,7 @@ const accountSchema = new mongoose.Schema({
         required: true,
     },
     platform: {
-        types: String,
+        type: String,
         enum: ['twitter', "linkedin", "facebook", "instagram"],
         required: true
     },
@@ -15,7 +15,7 @@ const accountSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    ZernioAccountId: {
+    zernioAccountId: {
         type: String, 
     },
     refreshToken: {

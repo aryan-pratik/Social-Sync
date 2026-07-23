@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { dummyAccountsData, dummyPostsData, PLATFORMS } from "../assets/assets";
+import { dummyPostsData, PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, XIcon } from "lucide-react";
 
 
@@ -9,16 +9,16 @@ const Scheduler = () => {
   const [scheduleDate, setSchduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [mediafile, setMediafile] = useState<File | null> (null);
+  const [mediafile, setMediafile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchPosts = async () => {
-    setPosts(dummyAccountsData)
+    setPosts(dummyPostsData)
   }
 
-  useEffect( () => {
-    (async () => await fetchPosts())
-    const interval = setInterval(async () => await fetchPosts(), 20000)
+  useEffect(() => {
+    fetchPosts()
+    const interval = setInterval(fetchPosts, 20000)
     return () => clearInterval(interval)
   }, [])
 
@@ -36,10 +36,23 @@ const Scheduler = () => {
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
-      setPosts((prev) => [...prev, dummyPostsData[0]])
+      const newPost = {
+        _id: Date.now().toString(),
+        content,
+        platforms: selectedPlatforms,
+        mediaType: mediafile ? (mediafile.type.startsWith("image/") ? "image" : "video") : undefined,
+        scheduledFor: `${scheduleDate}T${scheduleTime}`,
+        status: "scheduled",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }
+      setPosts((prev) => [newPost, ...prev])
+      setContent("")
+      setSchduleDate("")
+      setScheduleTime("")
+      setSelectedPlatforms([])
+      setMediafile(null)
     }, 1000)
-
-
   }
 
   return (
@@ -60,7 +73,7 @@ const Scheduler = () => {
                 return (
                   <button key={p.id} type="button"
                     onClick={() => togglePlatform(p.id)}
-                    className= {`flex items-center gap-1.5 p-3 rounded-md border transition-all duration-150 ${active ? "bg-red-50 border-red-300 text-red-500 scale-103" : "border-slate-200 text-slate-500 hover:border-slate-300"}`}>
+                    className={`flex items-center gap-1.5 p-3 rounded-md border transition-all duration-150 ${active ? "bg-red-50 border-red-300 text-red-500 scale-103" : "border-slate-200 text-slate-500 hover:border-slate-300"}`}>
                     <p.icon className="size-4.5" />
                   </button>
                 )
@@ -72,50 +85,50 @@ const Scheduler = () => {
           <div>
             <label className="block text-xs text-slate-500 uppercase mb-2">Content</label>
             <textarea required rows={5} placeholder="What do you want to share today"
-            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-shadow-slate-900 placeholder-slate-400 outline-none resize-none" value={content} onChange={(e) => setContent(e.target.value)}/>
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-shadow-slate-900 placeholder-slate-400 outline-none resize-none" value={content} onChange={(e) => setContent(e.target.value)} />
             <div className={`text-right text-xs mt-1 font-medium ${content.length > 270 ? "text-red-500" : "text-slate-400"}`}>
               {content.length}/270
             </div>
           </div>
 
           {/* Media Upload  */}
-              <label className="block text-xs text-slate-500 uppercase mb-2">Media (optional)</label>
-              {mediafile ? (
-                <div className="realtive rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
-                  {mediafile.type.startsWith("image/") 
-                  ? 
-                  <img src={URL.createObjectURL(mediafile)} alt="preview" className="w-full h-40 object-cover"/>
-                  : 
-                  <video src={URL.createObjectURL(mediafile)} className="w-full h-40 object-cover"/>} 
+          <label className="block text-xs text-slate-500 uppercase mb-2">Media (optional)</label>
+          {mediafile ? (
+            <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+              {mediafile.type.startsWith("image/")
+                ?
+                <img src={URL.createObjectURL(mediafile)} alt="preview" className="w-full h-40 object-cover" />
+                :
+                <video src={URL.createObjectURL(mediafile)} className="w-full h-40 object-cover" />}
 
-                  <button type="button" onClick={() => setMediafile(null)} className="absolute top-2 right-2 size-7 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-full flex items-center justify-center transition-colors">
-                    <XIcon className="size-3.5"/>
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center gap-2 p-5 py-10 border-2 border-dotted border-slate-200 rounded-xl cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-all group">
-                  <span className="text-sm text-slate-500 group-hover:text-red-600 transition-colors">Click to upload image or video</span>
-                  <input type="file" accept="image/*, video/*" className="hidden" onChange={(e) => e.target.files?.[0] && setMediafile(e.target.files[0])}/>
-                </label>
-              )}
+              <button type="button" onClick={() => setMediafile(null)} className="absolute top-2 right-2 size-7 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-full flex items-center justify-center transition-colors">
+                <XIcon className="size-3.5" />
+              </button>
+            </div>
+          ) : (
+            <label className="flex items-center justify-center gap-2 p-5 py-10 border-2 border-dotted border-slate-200 rounded-xl cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-all group">
+              <span className="text-sm text-slate-500 group-hover:text-red-600 transition-colors">Click to upload image or video</span>
+              <input type="file" accept="image/*, video/*" className="hidden" onChange={(e) => e.target.files?.[0] && setMediafile(e.target.files[0])} />
+            </label>
+          )}
           {/* Date & Time  */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Date */}
             <div>
               <label className="block text-xs text-slate-500 uppercase mb-2">Date</label>
               <div className="relative">
-                <CalendarIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                <CalendarIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input type="date" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduleDate} onChange={(e) => setSchduleDate(e.target.value)} />
-              </div>  
+              </div>
             </div>
 
             {/* Time */}
             <div>
-              <label className="block text-xs text-slate-500 uppercase mb-2">Date</label>
+              <label className="block text-xs text-slate-500 uppercase mb-2">Time</label>
               <div className="relative">
-                <ClockIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                <ClockIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                 <input type="time" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduleTime} onChange={(e) => setScheduleTime(e.target.value)} />
-              </div>  
+              </div>
             </div>
           </div>
 
@@ -123,12 +136,12 @@ const Scheduler = () => {
           <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 py-3.5 bg-red-500 hover:bg-red-600 transition-all text-white rounded-lg cursor-pointer">
             {loading ? (
               <>
-                <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"/> Scheduling....
+                <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Scheduling....
               </>
             ) : (
               <>
                 <span>Schedule Post</span>
-                <ArrowRightIcon className="size-4"/>
+                <ArrowRightIcon className="size-4" />
               </>
             )}
           </button>
@@ -141,24 +154,71 @@ const Scheduler = () => {
         {/* Upcoming */}
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="flex items-center gap-2.5 px-5 py-4 border-b border-slate-100">
-            <CalendarDaysIcon className="size-4 text-zinc-400"/>
+            <CalendarDaysIcon className="size-4 text-zinc-400" />
             <h3 className="text-slate-900 text-sm font-medium">Upcoming</h3>
             <span className="ml-auto text-xs font-bold bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded-full">{scheduled.length}</span>
           </div>
           <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
-            {scheduled.length === 0 ? ( 
+            {scheduled.length === 0 ? (
               <div className="py-10 text-center text-slate-400 text-sm">No posts scheduled yet</div>
             ) : (
               scheduled.map((postItem: any) => (
                 <div key={postItem._id || postItem.id} className="px-5 py-4 hover:bg-slate-50/60 transition-colors">
                   <div className="flex items-center justify-between mb-2">
-                    <div>
-                      {postItem.platform.map((p1: string) => {
+                    <div className="flex items-center gap-1.5">
+                      {(postItem.platforms || postItem.platform || []).map((p1: string) => {
                         const meta = PLATFORMS.find((p) => p.id === p1);
-                        return meta ? <meta.icon key={p1} className="size-3.5 text-slate-400"/> : null
+                        return meta ? <meta.icon key={p1} className="size-3.5 text-slate-400" /> : null
                       })}
                     </div>
+
+                    <div className="flex items-center gap-2">
+                      {postItem.mediaType && <span className="text-xs bg-slate-100 text-slate-600 border-slate px-1.5 py-0.5 rounded-md font-semibold capitalize">
+                        {postItem.mediaType}
+                      </span>}
+
+                      <span className="text-xs text-slate-400">{postItem.updatedAt ? new Date(postItem.updatedAt).toLocaleString() : ''}</span>
+                      <span className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-full">Scheduled</span>
+                    </div>
                   </div>
+                  <p className="text-slate-800 text-sm mt-2 line-clamp-1">{postItem.content}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Published */}
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-slate-100">
+            <CalendarDaysIcon className="size-4 text-emerald-500" />
+            <h3 className="text-slate-900 text-sm font-medium">Published</h3>
+            <span className="ml-auto text-xs font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">{published.length}</span>
+          </div>
+          <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
+            {published.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-sm">No published posts yet</div>
+            ) : (
+              published.map((postItem: any) => (
+                <div key={postItem._id || postItem.id} className="px-5 py-4 hover:bg-slate-50/60 transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      {(postItem.platforms || postItem.platform || []).map((p1: string) => {
+                        const meta = PLATFORMS.find((p) => p.id === p1);
+                        return meta ? <meta.icon key={p1} className="size-3.5 text-slate-400" /> : null
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {postItem.mediaType && <span className="text-xs bg-slate-100 text-slate-600 border-slate px-1.5 py-0.5 rounded-md font-semibold capitalize">
+                        {postItem.mediaType}
+                      </span>}
+
+                      <span className="text-xs text-slate-400">{postItem.updatedAt ? new Date(postItem.updatedAt).toLocaleString() : ''}</span>
+                      <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full">Published</span>
+                    </div>
+                  </div>
+                  <p className="text-slate-800 text-sm mt-2 line-clamp-1">{postItem.content}</p>
                 </div>
               ))
             )}
@@ -166,7 +226,7 @@ const Scheduler = () => {
         </div>
 
       </div>
-      
+
     </div>
   )
 }

@@ -35,6 +35,7 @@ const getOrCreateZernioProfile = async (user:any) : Promise<string> => {
 
     } catch (error: any) {
         console.error(error)
+        throw error;
     }
 } 
 
@@ -80,11 +81,21 @@ export const syncAccounts = async (req: AuthRequest, res: Response) : Promise<vo
 
     try {
         const profileId = await getOrCreateZernioProfile(req.user)
+
+        // console.log("Profile ID:", profileId);
+
+
         const result = await zernio.accounts.listAccounts({
             query: {profileId} as any
         })
 
         const data = result.data as any;
+
+        // console.log("========== ZERNIO RESPONSE ==========");
+        // console.dir(data, { depth: null });
+        // console.log("=====================================");
+
+
         const zernioAccounts: any[] = data?.accounts || (Array.isArray(data) ? data : [])
 
         const supportedPlatforms = ["instagram", "facebook", "twitter", "linkedin"]

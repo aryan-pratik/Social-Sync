@@ -43,9 +43,9 @@ export const disconnectAccount = async (req: AuthRequest, res: Response) : Promi
             return;
         }
 
-        if(account.ZernioAccountId) {
+        if(account.zernioAccountId) {
             try {
-                await zernio.accounts.deleteAccount({path: {account_id: account.ZernioAccountId}});
+                await zernio.accounts.deleteAccount({path: {account_id: account.zernioAccountId}});
             } catch (error: any) {
                 console.log(`Error deleting Zernio account: ${error?.response?.me?.data.message || error?.message}`);
                 return

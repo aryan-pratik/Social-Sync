@@ -5,7 +5,7 @@ import { addAccount, disconnectAccount, getAccounts } from "../controllers/accou
 const accountRouter = express.Router()
 
 accountRouter.get('/', protect, getAccounts)
-accountRouter.get('/', protect, addAccount)
-accountRouter.get('/:id', protect, disconnectAccount)
+accountRouter.post('/', protect, addAccount)
+accountRouter.delete('/:id', protect, disconnectAccount)
 
 export default accountRouter;

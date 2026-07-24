@@ -1,6 +1,6 @@
 import { ActivityIcon, CheckCircleIcon, ClockIcon, SendIcon, Share2Icon, TrendingUpIcon } from 'lucide-react'
-import React, { useState, useEffect } from 'react'
-import { dummyAccountsData, dummyActivityData, dummyPostsData } from '../assets/assets'
+import { useState, useEffect } from 'react'
+import api from '../api/axios'
 
 const Dashboard = () => {
   const [stats, setStats] = useState({scheduled: 0, published: 0, connectedAccounts: 0})
@@ -9,14 +9,18 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async() => {
       try {
-        const [postsRes, accountsRes, activitiesRes] = [{data: dummyPostsData}, {data: dummyAccountsData}, {data: dummyActivityData}]
-        const posts = postsRes.data;
+        const [postsRes, accountsRes, activitiesRes] = await Promise.all([api.get("/api/posts"), api.get("/api/accounts"), api.get("/api/activity")])
+
+        const posts = Array.isArray(postsRes.data) ? postsRes.data : postsRes.data.posts || [];
+        const accounts = Array.isArray(accountsRes.data) ? accountsRes.data : accountsRes.data.data || [];
+        const activityList = activitiesRes.data.activity || (Array.isArray(activitiesRes.data) ? activitiesRes.data : []);
+        
         setStats({
           scheduled: posts.filter((p: any) => p.status === 'scheduled').length,
           published: posts.filter((p: any) => p.status === 'published').length,
-          connectedAccounts: accountsRes.data.filter((a: any) => a.status === 'connected').length,
+          connectedAccounts: accounts.filter((a: any) => a.status === 'connected').length,
         })
-        setActivites(activitiesRes.data)
+        setActivites(activityList)
       } catch (error) {
         console.error("Error fetching dashboard data", error)
       }

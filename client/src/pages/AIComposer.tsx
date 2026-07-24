@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
-import { dummyGenerationData, PLATFORMS } from "../assets/assets"
+import { PLATFORMS } from "../assets/assets"
 import { ArrowRightIcon, Calendar1Icon, ClockIcon, HistoryIcon, Loader2Icon, TimerIcon, Wand2Icon, XIcon } from "lucide-react"
-import Scheduler from "./Scheduler"
+import api from "../api/axios"
+import toast from "react-hot-toast"
 
 
 const AIComposer = () => {
@@ -18,10 +19,15 @@ const AIComposer = () => {
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
   const [scheduling, setScheduling] = useState(false);
-  const [type, setType] = useState("standard");
 
   const fetchGenerations = async () => {
-    setGenerations(dummyGenerationData)
+    try {
+      const { data } = await api.get("/api/posts/generations");
+      const list = Array.isArray(data) ? data : (data.generation || data.generations || []);
+      setGenerations(list);
+    } catch (error: any) {
+      console.error("Error fetching generations:", error);
+    }
   }
 
   useEffect(() => {
@@ -29,21 +35,60 @@ const AIComposer = () => {
   }, [])
 
   const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast.error("Please enter a prompt");
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const { data } = await api.post("/api/posts/generate", { prompt, tone });
+      toast.success("Post generated successfully!");
+      setGenerations((prev) => [data, ...prev]);
+      setPrompt("");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || "Generation failed");
+    } finally {
       setLoading(false);
-    }, 1500)
+    }
+  }
+
+  const handleSchedule = async () => {
+    if (!activeScheduler) return;
+
+    if (selectedPlatforms.length === 0) {
+      toast.error("Please select at least one channel");
+      return;
+    }
+    if (!scheduledDate || !scheduledTime) {
+      toast.error("Please select date and time");
+      return;
+    }
+
+    const scheduledFor = new Date(`${scheduledDate}T${scheduledTime}`).toISOString();
+    setScheduling(true);
+
+    try {
+      await api.post("/api/posts", {
+        content: activeScheduler.content,
+        mediaUrl: activeScheduler.mediaUrl,
+        platforms: selectedPlatforms,
+        scheduledFor,
+        status: "scheduled"
+      });
+
+      toast.success("Post scheduled successfully!");
+      setActiveScheduler(null);
+      setSelectedPlatforms([]);
+      setScheduledDate("");
+      setScheduledTime("");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || "Failed to schedule post");
+    } finally {
+      setScheduling(false);
+    }
   }
 
   const tones = ["Professional", "Creative", "Funny", "Minimalist", "Excited"];
-
-  const handleSchedule = () => {
-    setScheduling(true);
-    setTimeout(() => {
-      setScheduling(false);
-      setActiveScheduler(null);
-    }, 2000)
-  }
 
 
   return (
@@ -99,7 +144,8 @@ const AIComposer = () => {
               key={t}
               type="button"
               onClick={() => setTone(t)}
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${tone === t ? "bg-red-500 text-white shadow-xs" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>
+              className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${tone === t ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}
+            >
               {t}
             </button>
           ))}
@@ -116,8 +162,8 @@ const AIComposer = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-          {generations.map((gen) => (
-            <div key={gen.id} className="group bg-white rounded-2xl border border-slate-100 p-5 hover:border-red-200 transition-all relative overflow-hidden">
+          {generations.map((gen, idx) => (
+            <div key={gen._id || gen.id || idx} className="group bg-white rounded-2xl border border-slate-100 p-5 hover:border-red-200 transition-all relative overflow-hidden">
               <div className="flex flex-col h-full space-y-4">
 
                 <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed flex-1">{gen.content}</p>
@@ -137,7 +183,7 @@ const AIComposer = () => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-400 uppercase tracking-widest">{new Date(gen.createdAt).toLocaleDateString()}</span>
+                  <span className="text-xs text-slate-400 uppercase tracking-widest">{new Date(gen.createdAt || Date.now()).toLocaleDateString()}</span>
                   <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-md">{gen.tone}</span>
                 </div>
               </div>

@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
-import { dummyPostsData, PLATFORMS } from "../assets/assets";
+import { PLATFORMS } from "../assets/assets";
 import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, XIcon } from "lucide-react";
+import api from "../api/axios";
+import toast from "react-hot-toast";
+toast
 
 
 const Scheduler = () => {
@@ -13,12 +16,17 @@ const Scheduler = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchPosts = async () => {
-    setPosts(dummyPostsData)
+    try {
+      const { data } = await api.get("/api/posts/")
+      setPosts(data)
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message)
+    }
   }
 
   useEffect(() => {
     fetchPosts()
-    const interval = setInterval(fetchPosts, 20000)
+    const interval = setInterval(fetchPosts, 10000)
     return () => clearInterval(interval)
   }, [])
 
@@ -33,26 +41,36 @@ const Scheduler = () => {
 
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault()
+    if(selectedPlatforms.length === 0) {
+      toast.error("Select atleast one platfrom")
+      return;
+    }
+    if(!scheduleDate || !scheduleTime) {
+      toast.error("Select data and time")
+      return;
+    }
+
+    const scheduledFor = new Date(`${scheduleDate}T${scheduleTime}`).toISOString(); 
+
     setLoading(true)
-    setTimeout(() => {
-      setLoading(false)
-      const newPost = {
-        _id: Date.now().toString(),
+    try {
+      await api.post("/api/posts", {
         content,
-        platforms: selectedPlatforms,
-        mediaType: mediafile ? (mediafile.type.startsWith("image/") ? "image" : "video") : undefined,
-        scheduledFor: `${scheduleDate}T${scheduleTime}`,
+        scheduledFor,
         status: "scheduled",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }
-      setPosts((prev) => [newPost, ...prev])
+        platforms: selectedPlatforms
+      })
+      toast.success("Post scheduled successfully")
       setContent("")
       setSchduleDate("")
       setScheduleTime("")
       setSelectedPlatforms([])
-      setMediafile(null)
-    }, 1000)
+      fetchPosts()
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

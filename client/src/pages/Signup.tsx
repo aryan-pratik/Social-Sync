@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
-export default function Login() {
+export default function Signup() {
 	// const [loginState, setLoginState] = useState(true);
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ export default function Login() {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			const { data } = await api.post(`/api/auth/login`, {
+			const { data } = await api.post(`/api/auth/register`, {
 				name,
 				email,
 				password,
@@ -48,10 +48,24 @@ export default function Login() {
 							<h1 className="text-2xl">Social Sync</h1>
 						</Link>
 						<p className="text-slate-400 text-sm mt-1">
-							SignIn to your Dashboard
+							SignUp to your Dashboard
 						</p>
 					</div>
 					<form onSubmit={handleSubmit} className="space-y-5 text-sm">
+						<div>
+							<label className="block mb-1.5">Name</label>
+							<div className="relative">
+								<User2Icon className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+								<input
+									type="text"
+									required
+									placeholder="Enter your name"
+									className="w-full pl-10 pr-4 py-2.5 bg-slate-800/50 outline-slate-300 border border-white/10 rounded-full"
+									value={name}
+									onChange={(e) => setName(e.target.value)}
+								/>
+							</div>
+						</div>
 						<div>
 							<label className="block mb-1.5">Email</label>
 							<div className="relative">
@@ -87,25 +101,24 @@ export default function Login() {
 							className="w-full py-2.5 px-4 bg-linear-to-r from-red-600 to-red-500 text-white rounded-full text-sm transition-all disabled:opacity-60 flex items-center justify-center gap-2"
 						>
 							{loading ? (
-								"Signing in..."
+								"Signing up..."
 							) : (
 								<>
-									SignIn
-									<ArrowRightIcon className="size-4" />
+									Sign Up <ArrowRightIcon className="size-4" />
 								</>
 							)}
 						</button>
 					</form>
 
 					<div className="mt-6 text-center text-sm text-slate-400">
-						Don't have an account?{" "}
+						Already have an account?{" "}
 						<button
 							onClick={() => {
-								navigate("/signup");
+								navigate("/login");
 							}}
 							className="text-violet-600 hover:text-violet-700"
 						>
-							Create one free
+							Sign In
 						</button>
 					</div>
 				</div>

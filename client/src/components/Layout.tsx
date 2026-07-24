@@ -8,11 +8,11 @@ const pageTitles: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/accounts": "Social Accounts",
   "/schedule": "Post Scheduler",
-  "/ai-composer": "Ai Composer"
+  "/ai-composer": "AI Composer"
 }
 
 const Layout = () => {
-  const {isAuthenticated, isLoading} = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   const location = useLocation()
 
@@ -20,44 +20,44 @@ const Layout = () => {
 
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  if(isLoading) {
+  if (isLoading) {
     return (
-      <div className='flex h-screen w-full items-center justify-center bg-slate-50'>
-        <div className='size-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin'></div>
+      <div className='flex h-screen w-full items-center justify-center bg-slate-800/50'>
+        <div className='size-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin'></div>
       </div>
     )
   }
 
-  if(!isAuthenticated) {
-    return <Navigate to="/login" replace/>
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
   }
 
   return (
-    <div className='flex h-screen bg-slate-50'>
+    <div className='flex h-screen bg-slate-800/50'>
       {isMobileMenuOpen && <div className='fixed inset-0 bg-slate-900/50 z-40 md:hidden'
-      onClick={() => setMobileMenuOpen(false)}/>}
+        onClick={() => setMobileMenuOpen(false)} />}
 
 
 
-      <Sidebar isOpen={isMobileMenuOpen} setisOpen={setMobileMenuOpen}/>
+      <Sidebar isOpen={isMobileMenuOpen} setIsOpen={setMobileMenuOpen} />
 
 
       <div className='flex-1 flex flex-col overflow-hidden'>
-        <header className='h-16 bg-white border-b border-slate-200 flex items-center px-4 md:px-8 gap-4'>
+        <header className='h-16 bg-slate-900 border-b border-white/10 flex items-center px-4 md:px-8 gap-4'>
 
-          <button className='md:hidden p-2 -ml-2 text-slate-500' onClick={() => setMobileMenuOpen(true)}>
-            <MenuIcon className='size-6'/>
+          <button className='md:hidden p-2 -ml-2 text-slate-400' onClick={() => setMobileMenuOpen(true)}>
+            <MenuIcon className='size-6' />
           </button>
 
           <div>
-            <h1 className='text-slate-900'>{title}</h1>
+            <h1 className='text-white'>{title}</h1>
             <p>Manage and automate your social presence</p>
           </div>
 
         </header>
 
         <main className='flex-1 overflow-auto p-4 sm:p-6 md:p-8 xl:p-12'>
-          <Outlet/>
+          <Outlet />
         </main>
       </div>
     </div>

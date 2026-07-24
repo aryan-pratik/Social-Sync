@@ -43,17 +43,17 @@ export const disconnectAccount = async (req: AuthRequest, res: Response) : Promi
             return;
         }
 
+        // console.log(account)
         if(account.zernioAccountId) {
             try {
-                await zernio.accounts.deleteAccount({path: {account_id: account.zernioAccountId}});
+                await zernio.accounts.deleteAccount({ path: { accountId: account.zernioAccountId } });
             } catch (error: any) {
-                console.log(`Error deleting Zernio account: ${error?.response?.me?.data.message || error?.message}`);
-                return
+                console.log(`Error deleting Zernio account: ${error?.response?.data?.message || error?.message}`);
             }
         }
 
         await account.deleteOne();
-        res.status(200).json({message: "Account disconnected successfully"});
+        res.status(200).json({ message: "Account disconnected successfully" });
     } catch (error: any) {
         res.status(500).json({message: error?.message || "Sever error"})
     }

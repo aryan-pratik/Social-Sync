@@ -46,6 +46,12 @@ export const initScheduler = async () => {
 
                     if (post.mediaUrl) {
                         payload.mediaUrl = post.mediaUrl;
+                        payload.mediaItems = [
+                            {
+                                url: post.mediaUrl,
+                                type: post.mediaType || "image"
+                            }
+                        ];
                     }
 
                     console.log(`Publishing post ${post._id} to ${JSON.stringify(zernioPlatforms)}`)

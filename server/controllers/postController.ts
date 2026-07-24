@@ -3,6 +3,7 @@ import { AuthRequest } from "../middlewares/authMiddleware.js";
 import { GoogleGenAI } from "@google/genai";
 import { Generation } from "../models/Generation.js";
 import { Post } from "../models/Post.js";
+import { Account } from "../models/Account.js";
 
 
 // Generate post
@@ -79,7 +80,7 @@ export const getGenerations = async (req: AuthRequest, res: Response) : Promise<
             user: req.user._id
         }).sort({createdAt: -1})
 
-        res.status(500).json({generation})
+        res.json(generation)
     } catch (error: any) {
         res.status(500).json({message: error?.message || "Server error"})
     }
@@ -100,7 +101,7 @@ export const getPosts = async (req: AuthRequest, res: Response) : Promise<void> 
 // POST /api/posts
 export const schedulePost = async (req: AuthRequest, res: Response) : Promise<void> => {
     try {
-        const { content, platforms, scheduledFor, status } = req.body
+        const { content, mediaUrl, mediaType, platforms, scheduledFor, status } = req.body
 
 
         let parsedPlatforms = platforms;
@@ -112,16 +113,41 @@ export const schedulePost = async (req: AuthRequest, res: Response) : Promise<vo
             }
         }
 
+        if (!Array.isArray(parsedPlatforms) || parsedPlatforms.length === 0) {
+            res.status(400).json({ message: "Please select at least one channel." });
+            return;
+        }
+
+        const connectedAccounts = await Account.find({
+            user: req.user._id,
+            platform: { $in: parsedPlatforms },
+            status: "connected"
+        });
+
+        const connectedPlatforms = connectedAccounts.map((a: any) => a.platform);
+        const unconnectedPlatforms = parsedPlatforms.filter((p: string) => !connectedPlatforms.includes(p));
+
+        if (unconnectedPlatforms.length > 0) {
+            const formatted = unconnectedPlatforms.map((p: string) => p.charAt(0).toUpperCase() + p.slice(1)).join(", ");
+            res.status(400).json({
+                message: `Please connect your ${formatted} account(s) before scheduling.`
+            });
+            return;
+        }
+
         const post = await Post.create({
             user: req.user._id,
             content,
+            mediaUrl,
+            mediaType,
             platforms: parsedPlatforms,
             scheduledFor, 
-            status,
+            status: status || "scheduled",
         }) 
         res.status(201).json(post)
         
     } catch (error: any) {
+        console.error("Error in schedulePost:", error);
         res.status(500).json({message: error?.message || "Server error"})
     }
 }

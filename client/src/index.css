@@ -2,12 +2,11 @@
 @import "tailwindcss";
 
 @theme {
-    --color-bg: #09090b;
-    --color-text: #f8fafc;
+    --color-bg: #fafafa;
+    --color-text: #111111;
     --font-sans: "Outfit", sans-serif;
     --font-serif: "Urbanist", sans-serif;
 }
-
 
 * {
     box-sizing: border-box;

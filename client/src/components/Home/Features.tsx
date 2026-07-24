@@ -1,72 +1,67 @@
-import { CalendarDaysIcon, Wand2Icon, Share2Icon, ZapIcon, BarChart3Icon, HashIcon } from "lucide-react";
+import { CalendarDaysIcon, Wand2Icon, Share2Icon, ZapIcon, HashIcon, BarChart3Icon } from "lucide-react";
 
 const features = [
     {
         icon: CalendarDaysIcon,
         title: "Smart Scheduling",
         description: "Queue posts across all platforms with a single click. Set it once and let us handle the rest.",
-        color: "bg-violet-50 text-violet-500",
     },
     {
         icon: Wand2Icon,
         title: "AI Content Generator",
         description: "Generate on-brand captions and stunning images with our built-in AI. Never stare at a blank page again.",
-        color: "bg-violet-50 text-violet-500",
-    },
-
-    {
-        icon: BarChart3Icon,
-        title: "Activity Dashboard",
-        description: "Get a bird's eye view of all published posts, scheduled content, and engagement activity in one place.",
-        color: "bg-violet-50 text-violet-500",
     },
     {
         icon: Share2Icon,
         title: "Multi-Platform",
         description: "Connect Twitter, LinkedIn, Facebook, and Instagram. Post everywhere from one unified workspace.",
-        color: "bg-violet-50 text-violet-500",
     },
     {
         icon: ZapIcon,
         title: "Instant Publishing",
         description: "Need to go live now? Publish immediately or schedule for peak engagement times with full timezone support.",
-        color: "bg-violet-50 text-violet-500",
     },
     {
         icon: HashIcon,
         title: "Hashtag Suggestions",
-        description: "Get AI-powered hashtag suggestions to reach a wider audience.",
-        color: "bg-violet-50 text-violet-500",
+        description: "Get AI-powered hashtag suggestions to reach a wider audience effortlessly.",
+    },
+    {
+        icon: BarChart3Icon,
+        title: "Analytics Insights",
+        description: "Track your performance across all platforms in one dashboard. See what works and double down.",
     },
 ];
 
 export default function Features() {
     return (
-        <section id="features" className="py-24 bg-slate-800/50">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <section id="features" className="py-24 bg-white relative overflow-hidden">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
                 <div className="text-center mb-16">
-                    <div className="mb-6 inline-flex items-center gap-1.5 bg-violet-500/10 border border-violet-500/15 text-violet-500 text-[11px] font-medium tracking-[0.06em] uppercase px-3.5 py-1.5 rounded-full">
-                        <ZapIcon className="size-3" />
-                        Everything you need
-                    </div>
-                    <h2 className="font-serif text-4xl sm:text-5xl font-medium leading-tight text-white">
-                        Automate your entire
-                        <br />
-                        <span className="text-violet-400 italic">social media workflow</span>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium text-slate-900 leading-tight">
+                        Automate your entire <br/>
+                        <span className="text-violet-600 italic">social media workflow</span>
                     </h2>
-                    <p className="mt-5 text-gray-400 max-w-xl mx-auto leading-relaxed">From content creation to scheduling — Social Sync handles it all so you can focus on what matters most.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {features.map((f) => (
-                        <div key={f.title} className="bg-slate-900 rounded-2xl border border-slate-100 p-6 hover:border-white/10 hover:shadow-md hover:shadow-slate-100 group">
-                            <div className={`size-10 rounded-xl flex items-center justify-center mb-4 ${f.color}`}>
-                                <f.icon className="size-5" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {features.map((feature, index) => {
+                        const Icon = feature.icon;
+                        return (
+                            <div key={index} className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                                {/* Decorative background shape matching user image */}
+                                <div className="absolute -top-16 -right-16 w-48 h-48 bg-violet-50 rounded-full group-hover:scale-110 transition-transform duration-500 z-0"></div>
+                                
+                                <div className="relative z-10">
+                                    <div className="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center mb-6 shadow-sm">
+                                        <Icon className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-slate-900 mb-3">{feature.title}</h3>
+                                    <p className="text-sm text-slate-500 leading-relaxed">{feature.description}</p>
+                                </div>
                             </div>
-                            <h3 className=" text-white mb-2">{f.title}</h3>
-                            <p className="text-sm text-slate-400/90 leading-relaxed">{f.description}</p>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
         </section>

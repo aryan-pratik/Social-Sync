@@ -4,6 +4,7 @@ import { GoogleGenAI } from "@google/genai";
 import { Generation } from "../models/Generation.js";
 import { Post } from "../models/Post.js";
 import { Account } from "../models/Account.js";
+import cloudinary from "../config/cloudinary.js";
 
 
 // Generate post
@@ -149,6 +150,32 @@ export const schedulePost = async (req: AuthRequest, res: Response) : Promise<vo
     } catch (error: any) {
         console.error("Error in schedulePost:", error);
         res.status(500).json({message: error?.message || "Server error"})
+    }
+}
+
+// Upload media to Cloudinary
+// POST /api/posts/upload
+export const uploadMedia = async (req: AuthRequest, res: Response) : Promise<void> => {
+    try {
+        const { media } = req.body;
+        if (!media) {
+            res.status(400).json({ message: "No media content provided" });
+            return;
+        }
+
+        const uploadResponse = await cloudinary.uploader.upload(media, {
+            folder: "socialsync",
+            resource_type: "auto"
+        });
+
+        res.json({
+            success: true,
+            url: uploadResponse.secure_url,
+            public_id: uploadResponse.public_id
+        });
+    } catch (error: any) {
+        console.error("Cloudinary upload error:", error);
+        res.status(500).json({ message: error?.message || "Cloudinary upload failed" });
     }
 }
 

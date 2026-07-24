@@ -11,11 +11,11 @@ interface PlatformPickerModalProps {
 const PlatformPickerModal = ({connectedIds, connecting, onClose, onConnect}: PlatformPickerModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-100">
+        <div className="bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md border border-slate-100">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 shadow">
-                <h2 className="text-xl font-bold text-slate-900">Connect an account</h2>
-                <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <h2 className="text-xl font-bold text-white">Connect an account</h2>
+                <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:bg-slate-800 hover:text-slate-700">
                     <XIcon className="size-4"/>
                 </button>
             </div>
@@ -29,25 +29,25 @@ const PlatformPickerModal = ({connectedIds, connecting, onClose, onConnect}: Pla
                         <button key={p.id}
                         disabled={isConnected || isConnecting}
                         onClick={() => onConnect(p.id)}
-                        className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${isConnected ? "border-red-200 bg-red-50 cursor-default" : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100 cursor-pointer"} ${isConnecting && 'opacity-50'}`}>
+                        className={`flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${isConnected ? "border-violet-200 bg-violet-50 cursor-default" : "border-white/10 bg-slate-800/50 hover:border-slate-300 hover:bg-slate-800 cursor-pointer"} ${isConnecting && 'opacity-50'}`}>
                             {/* Icon */}
                             <div className="p-2">
-                                <p.icon className={`size-5 ${isConnected ? "text-red-600" : "text-slate-700"}`} />
+                                <p.icon className={`size-5 ${isConnected ? "text-violet-600" : "text-slate-700"}`} />
                             </div>
 
                             {/* Label */}
                             <div className="flex-1 min-w-0">
-                                <div className={`text-sm ${isConnected ? "text-red-700" : "text-slate-800"}`}>
+                                <div className={`text-sm ${isConnected ? "text-violet-700" : "text-slate-200"}`}>
                                     {p.name}
                                 </div>
-                                <div className="text-xs text-slate-500 truncate">
+                                <div className="text-xs text-slate-400 truncate">
                                     {isConnected ? "Already connected" : p.description}
                                 </div>
                             </div>
 
                             {/* Status */}
-                            {isConnected && <CheckCircleIcon className="size-4 text-red-500 shrink-0"/>}
-                            {isConnecting && <div className="size-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin shrink-0"/>}
+                            {isConnected && <CheckCircleIcon className="size-4 text-violet-500 shrink-0"/>}
+                            {isConnecting && <div className="size-4 border-2 border-violet-600 border-t-transparent rounded-full animate-spin shrink-0"/>}
                             {!isConnected && !isConnecting && <ExternalLinkIcon className="size-3.5 text-slate-400 shrink-0"/>}
                         </button>
                     )

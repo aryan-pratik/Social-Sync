@@ -21,9 +21,9 @@ const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
 
     if(accounts.length === 0) {
         return (
-            <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center py-20 px-6">
-                <div className="size-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
-                    <PlusCircleIcon className="size-6 text-slate-500 opacity-50"/>
+            <div className="bg-slate-900 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center py-20 px-6">
+                <div className="size-14 bg-slate-800/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                    <PlusCircleIcon className="size-6 text-slate-400 opacity-50"/>
                 </div>
                 <p className="text-slate-700 text-lg font-semibold">No accounts connected</p>
                 <p className="text-sm text-slate-400 mt-1 max-w-xs text-center">Connect your first social platform to start scheduling posts.</p>
@@ -39,13 +39,13 @@ const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
             if(!meta) return null;
 
             return (
-                <div key={index} className="group bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 transition-all">
-                    <div className="size-12 bg-slate-50 rounded-xl flex items-center justify-center shrink-0">
+                <div key={index} className="group bg-slate-900 border border-white/10 rounded-2xl p-5 flex items-center gap-4 hover:border-slate-300 transition-all">
+                    <div className="size-12 bg-slate-800/50 rounded-xl flex items-center justify-center shrink-0">
                         <meta.icon className="size-6 text-slate-700"/>
                     </div>
                     <div>
-                        <div className="text-slate-900 truncate">{account.handle}</div>
-                        <div className="text-xs text-slate-500 mt-0.5">{meta.name}</div>
+                        <div className="text-white truncate">{account.handle}</div>
+                        <div className="text-xs text-slate-400 mt-0.5">{meta.name}</div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                         {account.status === 'connected' ? (
@@ -55,14 +55,14 @@ const AccountList = ({ accounts, onDisconnect }: AccountListProps) => {
                             </>
                         ) : (
                             <>
-                            <AlertCircleIcon className="size-4 text-slate-500"/>
-                            <span className="text-xs text-slate-500">Disconnected</span>
+                            <AlertCircleIcon className="size-4 text-slate-400"/>
+                            <span className="text-xs text-slate-400">Disconnected</span>
                             </>
                         )}
                     </div>
                     <button onClick={()=> handleDisconnect(account._id || account.id)}
                     title="Disconnet account"
-                    className="ml-2 p-1.5 rounded-lg text-slate-300 group-hover:text-red-500 transition-all">
+                    className="ml-2 p-1.5 rounded-lg text-slate-300 group-hover:text-violet-500 transition-all">
                         <UnplugIcon className="size-4"/>
                     </button>
                 </div>

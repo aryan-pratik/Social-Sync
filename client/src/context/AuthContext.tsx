@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import api from "../api/axios";
+import axios from "axios";
 
 interface User {
     _id: string,
@@ -25,7 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const { data } = await api.get("/api/auth/me");
+                // const { data } = await api.get("/api/auth/me");
+                console.log("Axios GGHKHKSDJHAK")
+                const {data}= await axios.get("/api/auth/me",{withCredentials:true})
                 setUser(data);
             } catch (error) {
                 setUser(null);

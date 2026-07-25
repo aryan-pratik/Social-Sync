@@ -65,12 +65,12 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // 🔑 Generate token & set cookie ONLY on Sign In
+        //  Generate token & set cookie ONLY on Sign In
         const token = generateToken(user._id.toString());
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            sameSite: "none",
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
         });
 

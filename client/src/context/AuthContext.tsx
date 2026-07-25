@@ -26,9 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // const { data } = await api.get("/api/auth/me");
-                console.log("Axios GGHKHKSDJHAK")
-                const {data}= await axios.get("/api/auth/me",{withCredentials:true})
+                const { data } = await api.get("/api/auth/me");
                 setUser(data);
             } catch (error) {
                 setUser(null);

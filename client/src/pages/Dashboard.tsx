@@ -1,4 +1,4 @@
-import { ActivityIcon, CheckCircleIcon, ClockIcon, SendIcon, Share2Icon } from 'lucide-react'
+import { ActivityIcon, CheckCircleIcon, ClockIcon, SendIcon, Share2Icon, AlertCircleIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../api/axios'
@@ -100,26 +100,43 @@ const Dashboard = () => {
           </div>
         ) : (
           <div>
-            {activities.map((activity: any) => (
-              <div key={activity._id || activity.id} className='flex items-start gap-3 px-6 py-3.5 hover:bg-slate-50/80 transition-colors duration-100 border-b border-slate-50 last:border-0'>
-                <div className='size-8 rounded-full bg-violet-50 flex items-center justify-center shrink-0 mt-0.5'>
-                  <SendIcon className='size-3.5 text-violet-500' />
-                </div>
-                <div className='flex-1 min-w-0'>
-                  <div className='flex items-center justify-between gap-2 mb-0.5'>
-                    <span className='px-2 py-0.5 text-[10px] font-semibold bg-violet-50 text-violet-700 rounded-full inline-block'>
-                      {activity.actionType === "POST_PUBLISHED" ? "Published" : (activity.type || "Published")}
-                    </span>
-                    <span className='text-[10px] text-slate-400 font-normal'>
-                      {new Date(activity.createdAt).toLocaleString()}
-                    </span>
+            {activities.map((activity: any) => {
+              const isPublished = activity.actionType === "POST_PUBLISHED" || activity.type === "Published";
+              const isScheduled = activity.actionType === "POST_SCHEDULED" || activity.type === "Scheduled";
+              const isFailed = activity.actionType === "POST_FAILED" || activity.type === "Failed";
+
+              const badgeStyle = isPublished
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                : isScheduled
+                ? "bg-amber-50 text-amber-700 border border-amber-100"
+                : "bg-rose-50 text-rose-700 border border-rose-100";
+
+              const label = isPublished ? "Published" : isScheduled ? "Scheduled" : isFailed ? "Failed / Not Published" : "Event";
+              const Icon = isPublished ? CheckCircleIcon : isScheduled ? ClockIcon : isFailed ? AlertCircleIcon : SendIcon;
+              const iconColor = isPublished ? "text-emerald-500" : isScheduled ? "text-amber-500" : isFailed ? "text-rose-500" : "text-violet-500";
+              const iconBg = isPublished ? "bg-emerald-50" : isScheduled ? "bg-amber-50" : isFailed ? "bg-rose-50" : "bg-violet-50";
+
+              return (
+                <div key={activity._id || activity.id} className='flex items-start gap-3 px-6 py-3.5 hover:bg-slate-50/80 transition-colors duration-100 border-b border-slate-50 last:border-0'>
+                  <div className={`size-8 rounded-full ${iconBg} flex items-center justify-center shrink-0 mt-0.5`}>
+                    <Icon className={`size-3.5 ${iconColor}`} />
                   </div>
-                  <p className='text-sm text-slate-700 mt-0.5'>
-                    {activity.description || activity.des || activity.message}
-                  </p>
+                  <div className='flex-1 min-w-0'>
+                    <div className='flex items-center justify-between gap-2 mb-0.5'>
+                      <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-full inline-block ${badgeStyle}`}>
+                        {label}
+                      </span>
+                      <span className='text-[10px] text-slate-400 font-normal'>
+                        {new Date(activity.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className='text-sm text-slate-700 mt-0.5'>
+                      {activity.description || activity.des || activity.message}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

@@ -8,14 +8,32 @@ import accountRouter from "./routes/accountRouter.js";
 import postRouter from "./routes/postRouter.js";
 import activityRouter from "./routes/activityRoutes.js";
 import { initScheduler } from "./services/scheduleService.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 await ConnectDb()
 
 // Middleware
-app.use(cors())
+const allowedOrigins = [
+    "https://socialssync.netlify.app",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    process.env.CLIENT_URL
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.some(o => o && origin.replace(/\/$/, "") === o.replace(/\/$/, ""))) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser())
 
 const port = process.env.PORT || 3000;
 

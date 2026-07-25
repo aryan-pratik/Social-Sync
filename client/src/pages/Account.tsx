@@ -9,6 +9,7 @@ import api from "../api/axios"
 const Account = () => {
 
   const [accounts, setAccounts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<string | null>(null)
   const [showPlatformPicker, setShowPlatfromPicker] = useState(false)
 
@@ -26,6 +27,8 @@ const Account = () => {
       
     } catch (error: any) {
       toast.error(error?.response?.data?.message || error?.message || "Failed to load accounts");
+    } finally {
+      setLoading(false);
     }
   }, [])
 
@@ -58,8 +61,8 @@ const Account = () => {
       const { data } = await api.get(`/api/oauth/${platformId}/url`)
       window.location.href = data.url;
     } catch (error : any) {
+      toast.error(error?.response?.data?.message || "Failed to connect platform")
       setConnecting(null)
-      toast.error(error?.response?.data?.message || error?.message || `Failed to start connection ${platformId}`)
     }
   }
 
@@ -94,8 +97,25 @@ const Account = () => {
     {/* Platfrom picker modal */}
     {showPlatformPicker && <PlatformPickerModal connectedIds={connectedIds} connecting={connecting} onClose={()=>setShowPlatfromPicker(false)} onConnect={handleConnect}/>}
 
-    {/* Connected accounts list */}
+    {/* Connected accounts list or Skeleton loading state */}
+    {loading ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-5 bg-white rounded-2xl border border-slate-200/80 animate-pulse flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-slate-200" />
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-slate-200 rounded" />
+                <div className="h-3 w-16 bg-slate-100 rounded" />
+              </div>
+            </div>
+            <div className="h-8 w-20 bg-slate-200 rounded-lg" />
+          </div>
+        ))}
+      </div>
+    ) : (
       <AccountList accounts={accounts} onDisconnect={handleDisconnect}/>
+    )}
 
     </div>
   )

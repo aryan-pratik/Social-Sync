@@ -1,11 +1,17 @@
 import { Calendar1Icon, LayoutDashboardIcon, LogOutIcon, UserIcon, Wand2Icon } from 'lucide-react'
-import { useLocation, NavLink } from 'react-router-dom'
+import { useLocation, NavLink, useNavigate } from 'react-router-dom'
 import logoUrl from '../assets/logo.svg'
 import { useAuth } from '../context/AuthContext'
 
 const Sidebar = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (value: boolean) => void }) => {
 
   const { logout, user } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/");
+  };
 
   const navItems = [
     { name: "Dashboard", icon: LayoutDashboardIcon, path: "/dashboard" },
@@ -61,7 +67,7 @@ const Sidebar = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (value: bo
             </div>
           </div>
 
-          <button onClick={logout} className="mt-1 flex items-center gap-2 px-4 py-2 w-full text-sm text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-xl transition-all duration-150">
+          <button onClick={handleLogout} className="mt-1 flex items-center gap-2 px-4 py-2 w-full text-sm text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-xl transition-all duration-150">
             <LogOutIcon className='size-4' />
             Sign Out
           </button>

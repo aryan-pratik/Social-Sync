@@ -5,39 +5,44 @@ import { Account } from "../models/Account.js";
 import { AuthRequest } from "../middlewares/authMiddleware.js";
 
 
-const getOrCreateZernioProfile = async (user:any) : Promise<string> => {
+const getOrCreateZernioProfile = async (user: any): Promise<string> => {
     try {
-        const result = await zernio.profiles.listProfiles()
+        if (user.zernioProfileId) {
+            return user.zernioProfileId;
+        }
+
+        const result = await zernio.profiles.listProfiles();
         const data = result.data as any;
         const profiles: any[] = Array.isArray(data) ? data : data?.profiles || data?.data || [];
 
+        const targetName = `${user.name || user.email}'s workspace`;
+        const existingProfile = profiles.find((p: any) => p.name === targetName);
 
-        if(profiles.length > 0) {
-            const pid = profiles[0]._id || profiles[0].id
-            await User.findByIdAndUpdate(user._id, {zernioProfileId: pid})
-            return pid
+        if (existingProfile) {
+            const pid = existingProfile._id || existingProfile.id;
+            await User.findByIdAndUpdate(user._id, { zernioProfileId: pid });
+            return pid;
         }
-        
+
         const createResult = await zernio.profiles.createProfile({
-            body: {name: `${user.name || user.email}'s workspace`} as any,
-        })
-        const created = (createResult.data as any)?.profile || createResult.data
+            body: { name: targetName } as any,
+        });
+        const created = (createResult.data as any)?.profile || createResult.data;
 
-        const pid = created?._id || created?.id
+        const pid = created?._id || created?.id;
 
-        if(!pid) {
-            throw new Error("failed to create Zernio profile no Id returned")
+        if (!pid) {
+            throw new Error("Failed to create Zernio profile, no ID returned");
         }
 
-
-        await User.findByIdAndUpdate(user._id, {zernioProfileId: pid})
-        return pid
+        await User.findByIdAndUpdate(user._id, { zernioProfileId: pid });
+        return pid;
 
     } catch (error: any) {
-        console.error(error)
+        console.error(error);
         throw error;
     }
-} 
+}; 
 
 // GET /api/auth/:platform
 export const generateAuthUrl = async (req: AuthRequest, res: Response) : Promise<void> => {
@@ -96,13 +101,20 @@ export const syncAccounts = async (req: AuthRequest, res: Response) : Promise<vo
         // console.log("=====================================");
 
 
-        const zernioAccounts: any[] = data?.accounts || (Array.isArray(data) ? data : [])
+        const zernioAccounts: any[] = data?.accounts || (Array.isArray(data) ? data : []);
+        const activeZernioIds = zernioAccounts.map(a => a._id || a.id).filter(Boolean);
 
-        const supportedPlatforms = ["instagram", "facebook", "twitter", "linkedin"]
+        // Delete any local account record for this user if it was removed on Zernio
+        await Account.deleteMany({
+            user: req.user._id,
+            zernioAccountId: { $exists: true, $ne: null, $nin: activeZernioIds }
+        });
+
+        const supportedPlatforms = ["instagram", "facebook", "twitter", "linkedin"];
         const syncedAccounts = [];
 
         for(const zAccount of zernioAccounts) {
-            const zid = zAccount._id || zAccount.id
+            const zid = zAccount._id || zAccount.id;
             if(!zid) {
                 console.warn("Skipping account with no ID")
                 continue;
@@ -117,7 +129,7 @@ export const syncAccounts = async (req: AuthRequest, res: Response) : Promise<vo
             }
 
             const account = await Account.findOneAndUpdate( 
-                {zernioAccountId: zid},
+                { zernioAccountId: zid, user: req.user._id },
                 {
                     user: req.user._id,
                     platform: normalizedPlatfrom,
@@ -126,7 +138,7 @@ export const syncAccounts = async (req: AuthRequest, res: Response) : Promise<vo
                     status: "connected",
                     avatarUrl: zAccount.avatarUrl || zAccount.picture || zAccount.profile_image_url
                 },
-                {upsert: true, returnDocument: 'after'}
+                { upsert: true, returnDocument: 'after' }
             )
             syncedAccounts.push(account)
         }

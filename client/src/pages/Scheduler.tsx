@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { PLATFORMS } from "../assets/assets";
-import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, XIcon } from "lucide-react";
+import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, XIcon, AlertCircleIcon } from "lucide-react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 toast
@@ -32,17 +32,17 @@ const Scheduler = () => {
     reader.onloadend = async () => {
       if (typeof reader.result === "string") {
         setUploadingMedia(true);
-        const toastId = toast.loading("Uploading media to Cloudinary...");
+        const toastId = toast.loading("Uploading media...");
         try {
           const { data } = await api.post("/api/posts/upload", { media: reader.result });
           if (data?.url) {
             setMediaUrl(data.url);
-            toast.success("Media uploaded to Cloudinary!", { id: toastId });
+            toast.success("Media uploaded !", { id: toastId });
           } else {
             toast.error("Cloudinary did not return a valid URL", { id: toastId });
           }
         } catch (error: any) {
-          toast.error(error?.response?.data?.message || "Failed to upload to Cloudinary", { id: toastId });
+          toast.error(error?.response?.data?.message || "Failed to upload", { id: toastId });
         } finally {
           setUploadingMedia(false);
         }
@@ -68,6 +68,7 @@ const Scheduler = () => {
 
   const scheduled = post.filter((p) => p.status === 'scheduled')
   const published = post.filter((p) => p.status === 'published')
+  const failedOrUnpublished = post.filter((p) => p.status === 'failed' || p.status === 'draft')
 
   const togglePlatform = (id: string) => {
     setSelectedPlatforms((prev) =>
@@ -269,9 +270,9 @@ const Scheduler = () => {
         {/* Published */}
         <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
           <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100">
-            <CalendarDaysIcon className="size-4 text-violet-400" />
+            <CalendarDaysIcon className="size-4 text-emerald-500" />
             <h3 className="text-slate-800 text-sm font-semibold">Published</h3>
-            <span className="ml-auto bg-violet-50 text-violet-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{published.length}</span>
+            <span className="ml-auto bg-emerald-50 text-emerald-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{published.length}</span>
           </div>
           <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
             {published.length === 0 ? (
@@ -290,6 +291,41 @@ const Scheduler = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-slate-400">{postItem.updatedAt ? new Date(postItem.updatedAt).toLocaleString() : ''}</span>
                       <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">Published</span>
+                    </div>
+                  </div>
+                  <p className="text-slate-700 text-sm line-clamp-1 mt-1">{postItem.content}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Failed / Not Published */}
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100">
+            <AlertCircleIcon className="size-4 text-rose-500" />
+            <h3 className="text-slate-800 text-sm font-semibold">Failed / Not Published</h3>
+            <span className="ml-auto bg-rose-50 text-rose-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{failedOrUnpublished.length}</span>
+          </div>
+          <div className="max-h-72 overflow-y-auto divide-y divide-slate-50">
+            {failedOrUnpublished.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-sm">No failed or unpublished posts</div>
+            ) : (
+              failedOrUnpublished.map((postItem: any) => (
+                <div key={postItem._id || postItem.id} className="px-5 py-4 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      {(postItem.platforms || postItem.platform || []).map((p1: string) => {
+                        const meta = PLATFORMS.find((p) => p.id === p1);
+                        return meta ? <meta.icon key={p1} className="size-3.5 text-slate-400" /> : null
+                      })}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-slate-400">{postItem.updatedAt ? new Date(postItem.updatedAt).toLocaleString() : ''}</span>
+                      <span className="text-[10px] bg-rose-50 text-rose-600 border border-rose-100 px-2 py-0.5 rounded-full font-semibold capitalize">
+                        {postItem.status === 'failed' ? 'Failed' : 'Draft'}
+                      </span>
                     </div>
                   </div>
                   <p className="text-slate-700 text-sm line-clamp-1 mt-1">{postItem.content}</p>

@@ -12,7 +12,7 @@ export default function Signup() {
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const navigate = useNavigate();
-	const { login, user } = useAuth();
+	const { user } = useAuth();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -23,8 +23,8 @@ export default function Signup() {
 				email,
 				password,
 			});
-			login(data, data.token);
-			navigate("/dashboard");
+			toast.success(data.message || "Registration successful! Please sign in.");
+			navigate("/login");
 		} catch (error: any) {
 			toast.error(error.response?.data?.message || error?.message);
 		} finally {

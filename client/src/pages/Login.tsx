@@ -21,7 +21,7 @@ export default function Login() {
 				email,
 				password,
 			});
-			login(data, data.token);
+			login(data);
 			navigate("/dashboard");
 		} catch (error: any) {
 			toast.error(error.response?.data?.message || error?.message);

@@ -8,7 +8,7 @@ const activityLogSchema = new mongoose.Schema({
     },
     actionType: {
         type: String, 
-        enum: ["POST_PUBLISHED", "AI_REPLY"], 
+        enum: ["POST_PUBLISHED", "POST_SCHEDULED", "POST_FAILED", "AI_REPLY"], 
         required: true
     },
     description: {

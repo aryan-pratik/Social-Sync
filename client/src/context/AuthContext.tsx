@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState, useContext } from "react";
 import api from "../api/axios";
-import axios from "axios";
 
 interface User {
     _id: string,

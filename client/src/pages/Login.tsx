@@ -20,7 +20,7 @@ export default function Login() {
 			const { data } = await api.post(`/api/auth/login`, {
 				email,
 				password,
-			});
+			},{withCredentials:true});
 			login(data);
 			navigate("/dashboard");
 		} catch (error: any) {

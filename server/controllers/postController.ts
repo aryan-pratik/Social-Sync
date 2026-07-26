@@ -9,18 +9,18 @@ import cloudinary from "../config/cloudinary.js";
 
 // Generate post
 // POST /api/posts/generate
-export const generatePost = async (req: AuthRequest, res:Response ) : Promise<void> => {
+export const generatePost = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const {prompt, tone } = req.body
+        const { prompt, tone } = req.body
 
         const apiKey = process.env.GEMINI_API_KEY;
 
-        if(!apiKey) {
-            res.status(500).json({message:"Your gemini api key is missing. Add it in your .env"})
+        if (!apiKey) {
+            res.status(500).json({ message: "Your gemini api key is missing. Add it in your .env" })
             return
         }
 
-        const ai = new GoogleGenAI({apiKey})
+        const ai = new GoogleGenAI({ apiKey })
 
         // Generating text with fallback across models
         const models = ["gemini-3.6-flash-lite", "gemini-3.6-flash"];
@@ -31,7 +31,35 @@ export const generatePost = async (req: AuthRequest, res:Response ) : Promise<vo
             try {
                 result = await ai.models.generateContent({
                     model: modelName,
-                    contents: `Generate a social media post based on this prompt: ${prompt} and tone: ${tone} Include the relevant hashtags`
+                    contents: `You are an expert social media copywriter and growth marketer.
+
+                    Your goal is to generate exactly one highly engaging social media post that maximizes attention, readability, and audience interaction.
+
+                    Input:
+                    - Prompt: "${prompt}"
+                    - Tone: "${tone}"
+
+                    Instructions:
+                    - Generate exactly one social media post.
+                    - Match the requested tone consistently throughout the post.
+                    - Start with a strong hook that captures attention within the first sentence.
+                    - Make the post engaging, relatable, and easy to read.
+                    - Encourage interaction naturally (comments, shares, likes, or discussion) without sounding spammy.
+                    - Include a clear takeaway, insight, or value for the reader.
+                    - Use concise sentences and appropriate line breaks to improve readability.
+                    - Include emojis only when they enhance the tone and engagement.
+                    - Include 3–8 highly relevant hashtags at the end of the post. Avoid generic or unrelated hashtags.
+                    - Adapt the writing style to the topic instead of using repetitive templates.
+                    - Do not use clickbait, misleading claims, excessive capitalization, or hashtag stuffing.
+                    - Keep the content authentic, conversational, and optimized for high engagement.
+
+                    Output Rules:
+                    - Generate exactly one post.
+                    - Do not provide multiple options, variations, explanations, introductions, or notes.
+                    - Do not wrap the response in quotes.
+                    - Do not include labels such as "Post:", "Caption:", or "Here's your post:".
+                    - Do not use Markdown formatting such as **, *, _, headings, bullet points, or code blocks.
+                    - Output only the final post content.`
                 });
                 if (result) break;
             } catch (err: any) {
@@ -49,7 +77,7 @@ export const generatePost = async (req: AuthRequest, res:Response ) : Promise<vo
         try {
             const rawText = result.text || ""
             const jsonMatch = rawText.match(/\{[\s\S]*\}/)
-            const data = jsonMatch ? JSON.parse(jsonMatch[0]) : {content: rawText};
+            const data = jsonMatch ? JSON.parse(jsonMatch[0]) : { content: rawText };
 
             content = data.content;
         } catch (error) {
@@ -66,47 +94,47 @@ export const generatePost = async (req: AuthRequest, res:Response ) : Promise<vo
         })
 
         res.json(generation)
-        
-    } catch (error:any) {
+
+    } catch (error: any) {
         console.error('Error in generatePost:', error);
-        res.status(500).json({message: error?.message || "Server error"});
+        res.status(500).json({ message: error?.message || "Server error" });
     }
 }
 
 // Get generated posts
 // GET /api/posts/generations
-export const getGenerations = async (req: AuthRequest, res: Response) : Promise<void> => {
+export const getGenerations = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const generation = await Generation.find({
             user: req.user._id
-        }).sort({createdAt: -1})
+        }).sort({ createdAt: -1 })
 
         res.json(generation)
     } catch (error: any) {
-        res.status(500).json({message: error?.message || "Server error"})
+        res.status(500).json({ message: error?.message || "Server error" })
     }
 }
 
 // Get posts
 // GET /api/posts
-export const getPosts = async (req: AuthRequest, res: Response) : Promise<void> => {
+export const getPosts = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
-        const posts = await Post.find({user: req.user._id})
+        const posts = await Post.find({ user: req.user._id })
         res.json(posts)
     } catch (error: any) {
-        res.status(500).json({message: error?.message || "Server error"})
+        res.status(500).json({ message: error?.message || "Server error" })
     }
 }
 
 // Schedule post
 // POST /api/posts
-export const schedulePost = async (req: AuthRequest, res: Response) : Promise<void> => {
+export const schedulePost = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { content, mediaUrl, mediaType, platforms, scheduledFor, status } = req.body
 
 
         let parsedPlatforms = platforms;
-        if(typeof platforms === "string") {
+        if (typeof platforms === "string") {
             try {
                 parsedPlatforms = JSON.parse(platforms)
             } catch (error) {
@@ -142,20 +170,20 @@ export const schedulePost = async (req: AuthRequest, res: Response) : Promise<vo
             mediaUrl,
             mediaType,
             platforms: parsedPlatforms,
-            scheduledFor, 
+            scheduledFor,
             status: status || "scheduled",
-        }) 
+        })
         res.status(201).json(post)
-        
+
     } catch (error: any) {
         console.error("Error in schedulePost:", error);
-        res.status(500).json({message: error?.message || "Server error"})
+        res.status(500).json({ message: error?.message || "Server error" })
     }
 }
 
 // Upload media to Cloudinary
 // POST /api/posts/upload
-export const uploadMedia = async (req: AuthRequest, res: Response) : Promise<void> => {
+export const uploadMedia = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { media } = req.body;
         if (!media) {
@@ -179,4 +207,32 @@ export const uploadMedia = async (req: AuthRequest, res: Response) : Promise<voi
     }
 }
 
+// Update generated post
+// PUT /api/posts/generations/:id
+export const updateGeneration = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { content } = req.body;
 
+        if (!content) {
+            res.status(400).json({ message: "Content is required" });
+            return;
+        }
+
+        const generation = await Generation.findOneAndUpdate(
+            { _id: id, user: req.user._id },
+            { content },
+            { new: true }
+        );
+
+        if (!generation) {
+            res.status(404).json({ message: "Generation not found" });
+            return;
+        }
+
+        res.json(generation);
+    } catch (error: any) {
+        console.error("Error updating generation:", error);
+        res.status(500).json({ message: error?.message || "Server error" });
+    }
+}

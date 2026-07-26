@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { PLATFORMS } from "../assets/assets"
-import { ArrowRightIcon, Calendar1Icon, ClockIcon, HistoryIcon, Loader2Icon, TimerIcon, Wand2Icon, XIcon } from "lucide-react"
+import { ArrowRightIcon, Calendar1Icon, CheckIcon, ClockIcon, Edit3Icon, HistoryIcon, Loader2Icon, TimerIcon, Wand2Icon, XIcon } from "lucide-react"
 import api from "../api/axios"
 import toast from "react-hot-toast"
 
@@ -169,10 +169,19 @@ const AIComposer = () => {
           <span className="bg-violet-50 text-violet-600 text-xs font-bold px-2.5 py-0.5 rounded-full">{generations.length} total</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
           {generations.map((gen, idx) => (
-            <div key={gen._id || gen.id || idx} className="group bg-white rounded-2xl border border-slate-100 p-5 hover:border-violet-200 hover:shadow-md hover:shadow-violet-500/8 transition-all duration-150 flex flex-col gap-3">
-              <p className="text-sm text-slate-700 line-clamp-3 leading-relaxed flex-1">{gen.content}</p>
+            <div key={gen._id || gen.id || idx} className="group bg-white rounded-2xl border border-slate-100 p-5 hover:border-violet-200 hover:shadow-md hover:shadow-violet-500/8 transition-all duration-150 flex flex-col gap-3 relative">
+              <div className="relative group/content flex-1 flex flex-col">
+                <p className="text-sm text-slate-700 line-clamp-3 leading-relaxed pr-6">{gen.content}</p>
+                <button
+                  onClick={() => setActiveScheduler(gen)}
+                  className="absolute right-0 top-0 p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors opacity-100 lg:opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+                  title="Edit Post"
+                >
+                  <Edit3Icon className="size-3.5" />
+                </button>
+              </div>
 
               {gen.mediaUrl && (
                 <div className="rounded-xl overflow-hidden border border-slate-100">
@@ -225,8 +234,16 @@ const AIComposer = () => {
                 </div>
               )}
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-3">
-                <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-1.5">Generated Content</p>
-                <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">{activeScheduler.content}</p>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Generated Content</p>
+                  <p className="text-slate-400 text-[10px] uppercase font-semibold flex items-center gap-1"><Edit3Icon className="size-3" /> Editable</p>
+                </div>
+                <textarea
+                  rows={8}
+                  className="w-full p-0 text-sm text-slate-800 bg-transparent border-none outline-none resize-none focus:ring-0 transition-all leading-relaxed custom-scrollbar"
+                  value={activeScheduler.content}
+                  onChange={(e) => setActiveScheduler({ ...activeScheduler, content: e.target.value })}
+                />
                 {activeScheduler.mediaUrl && (
                   <img src={activeScheduler.mediaUrl} alt="preview" className="w-full aspect-video object-cover rounded-xl border border-slate-200" />
                 )}
